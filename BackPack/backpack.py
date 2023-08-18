@@ -65,18 +65,22 @@ def del_tail():
 
 
 def del_select(item_id, item_amount):
-    global head, tail, curr, count
-    deleted = 0
-    curr = head
+    global head, tail, curr
+    if head is None:
+        head = tail = item_amount
+        head.prev = None
+        tail.next = None
+    else:
+        curr = head
     while curr and curr.item_id != item_id:
         curr = curr.next
     if curr and curr.item_id == item_id:
         curr.value -= item_amount
-        count -= item_amount
-        curr.prev.next = curr.next
-        del curr
-        deleted = item_amount
-        return deleted
+    else:
+        tail.next = item_amount
+        item_amount.prev = tail
+        tail = item_amount
+        tail.next = None
 
 
 def open_backpack(opened):
@@ -162,15 +166,15 @@ while True:
         else:
             item_id = input("Input item ID: ").lower()
             item_amount = int(input("Input amount to del: "))
-            del_status = del_select(item_id, item_amount)
             count -= item_amount
-            if item_amount < count:
+            if count < 20:
                 print("Item deleted")
                 input("Press Enter to continue...")
+                del_select(item_id, item_amount)
                 continue
             else:
                 print("cannot delete")
-                break
+                continue
 
     elif input_choice == 4:
         flag = not flag
