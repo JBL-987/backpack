@@ -66,21 +66,28 @@ def del_tail():
 
 def del_select(item_id, item_amount):
     global head, tail, curr
-    if head is None:
-        head = tail = item_amount
-        head.prev = None
-        tail.next = None
-    else:
-        curr = head
-    while curr and curr.item_id != item_id:
+    deleted = 0
+    curr = head
+    while curr.item_id != item_id:
         curr = curr.next
-    if curr and curr.item_id == item_id:
+        if curr is None:
+            return deleted
+    if curr.value > item_amount:
         curr.value -= item_amount
     else:
-        tail.next = item_amount
-        item_amount.prev = tail
-        tail = item_amount
-        tail.next = None
+        if head == tail:
+            del head
+            del tail
+            head = None
+            tail = None
+        elif curr == head:
+            del_head()
+        elif curr == tail:
+            del_tail()
+        else:
+            curr.prev.next = curr.next
+            del curr
+    return 1
 
 
 def open_backpack(opened):
@@ -98,44 +105,27 @@ def open_backpack(opened):
             count += 1
 
 
-def open_backpack_reverse(opened):
-    global tail, curr
-    if opened:
-        count = 1
-        curr = tail
-        if tail is None or head is None:
-            print("Backpack is empty!")
-            return
-        print("No.\tItem Amount\t\tItem ID\n")
-        while curr:
-            print(f"{count}.\t{curr.value}\t\t\t{curr.item_id}\n")
-            curr = curr.prev
-            count += 1
-
-
 def menu():
     print("1. Add Items")
     print("2. Open/Close Backpack")
     print("3. Delete Selected Item")
-    print("4. Reverse Backpack List")
-    print("5. Exit")
+    print("4. Exit")
 
 
 head = None
 tail = None
 curr = None
-flag = False
+flag = 0
 count = 0
-opened = False
+opened = 0
 
 while True:
     if count == 20:
         print("Backpack is full!")
-    print("Backpack menu:")
+    else:
+        print("Backpack menu:")
     if not flag:
         open_backpack(opened)
-    else:
-        open_backpack_reverse(opened)
     print(f"Item in backpack: {count}\n")
     menu()
     input_choice = int(input("Input menu: "))
@@ -167,19 +157,15 @@ while True:
             item_id = input("Input item ID: ").lower()
             item_amount = int(input("Input amount to del: "))
             count -= item_amount
-            if count < 20:
-                print("Item deleted")
+            if count > 20:
+                print("cannot deleted")
                 input("Press Enter to continue...")
-                del_select(item_id, item_amount)
                 continue
-            else:
-                print("cannot delete")
-                continue
+            del_select(item_id, item_amount)
+            print("Item Deleted")
+            input("Press Enter to continue...")
 
     elif input_choice == 4:
-        flag = not flag
-
-    elif input_choice == 5:
         break
 
     else:
